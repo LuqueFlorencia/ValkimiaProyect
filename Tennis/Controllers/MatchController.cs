@@ -5,6 +5,7 @@ using Tennis.Middlewares;
 using Tennis.Models.Entity;
 using Tennis.Models.Response;
 using Tennis.Repository;
+using Tennis.Services;
 using Tennis.Services.Interfaces;
 
 namespace Tennis.Controllers
@@ -38,12 +39,15 @@ namespace Tennis.Controllers
             {
                 var matchResponse = new MatchResponse();
                 matchResponse.Date = match.Date;
-                matchResponse.MatchType = match.MatchType;
-                matchResponse.IdPlayer1 = match.IdPlayer1;
-                matchResponse.IdPlayer2 = match.IdPlayer2;
-                matchResponse.WinnerId = match.WinnerId;
-                matchResponse.WinnerFirstName = match.PlayerWinner.Person.FirstName;
-                matchResponse.WinnerLastName = match.PlayerWinner.Person.LastName;
+                matchResponse.MatchType = match.GetMatchTypeDescription();
+                matchResponse.Player1 = match.Player1.GetFullName();
+                matchResponse.Player2 = match.Player2.GetFullName();
+                matchResponse.Winner = match.PlayerWinner.GetFullName();
+                //matchResponse.IdPlayer1 = match.IdPlayer1;
+                //matchResponse.IdPlayer2 = match.IdPlayer2;
+                //matchResponse.WinnerId = match.WinnerId;
+                //matchResponse.WinnerFirstName = match.PlayerWinner.Person.FirstName;
+                //matchResponse.WinnerLastName = match.PlayerWinner.Person.LastName;
 
                 matchesResponse.Add(matchResponse);
             }

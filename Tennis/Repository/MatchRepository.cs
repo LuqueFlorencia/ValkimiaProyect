@@ -28,8 +28,10 @@ namespace Tennis.Repository
             var matches = new List<Match>();
             matches = await _context.Set<Match>()
                 .Where(m => m.TournamentId == id)
-                .Include(t => t.PlayerWinner)
-                .ThenInclude(t => t.Person)
+                .Include(t => t.PlayerWinner).ThenInclude(pw => pw.Person)
+                .Include(t => t.Player1).ThenInclude(p1 => p1.Person)
+                .Include(t => t.Player2).ThenInclude(p2 => p2.Person)
+                .OrderByDescending(x=>x.MatchType)
                 .ToListAsync();
             return matches;
         }

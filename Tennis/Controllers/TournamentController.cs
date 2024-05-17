@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
-using System.Text.Json.Serialization;
 using Tennis.Helpers;
 using Tennis.Models.Entity;
 using Tennis.Models.Request;
@@ -40,7 +39,21 @@ namespace Tennis.Controllers
             player = await _matchRepository.PlayTournament(tournament, players);
             tournament = await _tournamentRepository.SetWinner(id, player.IdPlayer);
             Console.WriteLine("Player Winner: " + player.IdPlayer.ToString());
-            return Ok();
+
+            var tournamentResponse = new TournamentResponse();
+            tournamentResponse.Name = tournament.Name;
+            tournamentResponse.Gender = tournament.Gender.GetDescription();
+            tournamentResponse.StartDate = tournament.StartDate;
+            tournamentResponse.EndDate = tournament.EndDate;
+            tournamentResponse.Capacity = tournament.Capacity;
+            tournamentResponse.Prize = tournament.Prize;
+            tournamentResponse.Winner = tournament.Player.GetFullName();
+            //tournamentResponse.WinnerId = tournament.WinnerId;
+            //tournamentResponse.FirstName = tournament.Player.Person.FirstName;
+            //tournamentResponse.LastName = tournament.Player.Person.LastName;
+
+            string tournament_string = JsonConvert.SerializeObject(tournamentResponse);
+            return Ok(tournament_string);
         }
 
         [HttpPost]
@@ -48,30 +61,31 @@ namespace Tennis.Controllers
         //Crea un nuevo torneo
         public async Task<IActionResult> Create([FromBody] TournamentRequest tournamentRequest)
         {
-            var options = new JsonSerializerOptions
-            {
-                Converters =
-            {
-                new DateOnlyJsonConverter()
-            },
-                WriteIndented = true
-            };
-            string json = System.Text.Json.JsonSerializer.Serialize(tournamentRequest, options);
-            Console.WriteLine(json);
+            //var options = new JsonSerializerOptions
+            //{
+            //    Converters =
+            //{
+            //    new DateOnlyJsonConverter()
+            //},
+            //    WriteIndented = true
+            //};
+            //string json = System.Text.Json.JsonSerializer.Serialize(tournamentRequest, options);
+            //Console.WriteLine(json);
 
-            var deserializedTournamentRequest = System.Text.Json.JsonSerializer.Deserialize<TournamentRequest>(json, options);
-            Console.WriteLine(deserializedTournamentRequest.StartDate);
+            //var deserializedTournamentRequest = System.Text.Json.JsonSerializer.Deserialize<TournamentRequest>(json, options);
+            //Console.WriteLine(deserializedTournamentRequest.StartDate);
 
             var newTournament = new TournamentRequest();
             newTournament.Name = tournamentRequest.Name;
             newTournament.Gender = tournamentRequest.Gender;
-            newTournament.StartDate = DateOnly.FromDateTime(DateTime.Now);
-            newTournament.EndDate = DateOnly.FromDateTime(DateTime.Now);
+            //newTournament.StartDate = DateOnly.FromDateTime(DateTime.Now);
+            //newTournament.EndDate = DateOnly.FromDateTime(DateTime.Now);
             newTournament.Capacity = tournamentRequest.Capacity;
             newTournament.Prize = tournamentRequest.Prize;
 
-            newTournament = await _tournamentRepository.CreateNewTournament(newTournament);
-            string tournament_string = JsonConvert.SerializeObject(newTournament);
+            var tournament = new Tournament();
+            tournament = await _tournamentRepository.CreateNewTournament(newTournament);
+            string tournament_string = JsonConvert.SerializeObject(tournament);
             return Ok(tournament_string);
         }
 
@@ -91,7 +105,12 @@ namespace Tennis.Controllers
                 TournamentResponse.EndDate = tournament.EndDate;
                 TournamentResponse.Capacity = tournament.Capacity;
                 TournamentResponse.Prize = tournament.Prize;
-                TournamentResponse.WinnerId = tournament.WinnerId;
+                TournamentResponse.Gender = tournament.Gender.GetDescription();
+                TournamentResponse.Winner = null;
+                if (!(tournament.Player == null))
+                {
+                    TournamentResponse.Winner = tournament.Player.GetFullName();
+                }
 
                 TournamentsResponse.Add(TournamentResponse);
             }
@@ -115,9 +134,11 @@ namespace Tennis.Controllers
                 TournamentResponse.EndDate = tournament.EndDate;
                 TournamentResponse.Capacity = tournament.Capacity;
                 TournamentResponse.Prize = tournament.Prize;
-                TournamentResponse.WinnerId = tournament.WinnerId;
-                TournamentResponse.FirstName = tournament.Player.Person.FirstName;
-                TournamentResponse.LastName = tournament.Player.Person.LastName;
+                TournamentResponse.Gender = tournament.Gender.GetDescription();
+                TournamentResponse.Winner = tournament.Player.GetFullName();
+                //TournamentResponse.WinnerId = tournament.WinnerId;
+                //TournamentResponse.FirstName = tournament.Player.Person.FirstName;
+                //TournamentResponse.LastName = tournament.Player.Person.LastName;
 
                 TournamentsResponse.Add(TournamentResponse);
             }

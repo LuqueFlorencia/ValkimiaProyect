@@ -81,7 +81,5 @@ namespace Tennis.Controllers
                 throw new Exception("The player is already registrated");
             }
         }
-
-
     }
 }

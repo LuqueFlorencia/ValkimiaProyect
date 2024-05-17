@@ -30,16 +30,25 @@ namespace Tennis.Services
             return playerWinner;
         }
 
-        //public static Models.Entity.Match Create (Tournament tournament, Player player1, Player player2, int matchType)
-        //{
-        //    var match = new Models.Entity.Match();
-        //    match.TournamentId = tournament.IdTournament;
-        //    match.IdPlayer1 = player1.IdPlayer;
-        //    match.IdPlayer2 = player2.IdPlayer;
-        //    match.Date = new DateOnly(DateTime.Now.Year,DateTime.Now.Month,DateTime.Now.Day);
-        //    match.MatchType = matchType;
-
-        //    return match;
-        //}
+        public static string GetMatchTypeDescription(this Tennis.Models.Entity.Match match)
+        {
+            string description = "";
+            switch (match.MatchType)
+            {
+                case 8:
+                    description = "8vo";
+                    break;
+                case 4:
+                    description = "4to";
+                    break;
+                case 2:
+                    description = "Semifinal";
+                    break;
+                case 1:
+                    description = "Final";
+                    break;
+            }
+            return description;
+        }
     }
 }

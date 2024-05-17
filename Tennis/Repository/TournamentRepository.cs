@@ -15,8 +15,17 @@ namespace Tennis.Repository
             _context = context;
         }
 
-        public async Task<TournamentRequest> CreateNewTournament(TournamentRequest tournament)
+        public async Task<Tournament> CreateNewTournament(TournamentRequest tournamentRequest)
         {
+            var tournament = new Tournament();
+            tournament.StartDate = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day); //tournamentRequest.StartDate;
+            tournament.EndDate = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day+1);//tournamentRequest.EndDate;
+            tournament.Gender = tournamentRequest.Gender;
+            tournament.Capacity = tournamentRequest.Capacity;
+            tournament.Name = tournamentRequest.Name;
+            tournament.WinnerId = null;
+            tournament.Prize = tournamentRequest.Prize;
+
             _context.Add(tournament);
             await _context.SaveChangesAsync();
             return tournament;
@@ -26,6 +35,7 @@ namespace Tennis.Repository
         {
             var tournament = new List<Tournament>();
             tournament = await _context.Set<Tournament>()
+                                .Include(t => t.Player).ThenInclude(tp => tp.Person)
                                 .ToListAsync();
             return tournament;
         }
@@ -44,7 +54,8 @@ namespace Tennis.Repository
         public async Task<Tournament> GetTournamentById(int id)
         {
             var tournament = new Tournament();
-            tournament = _context.Set<Tournament>().FirstOrDefault(t => t.IdTournament == id);
+            tournament = _context.Set<Tournament>().Include(t => t.Player).ThenInclude(tp => tp.Person)
+                                                   .FirstOrDefault(t => t.IdTournament == id);
             return tournament;
         }
 

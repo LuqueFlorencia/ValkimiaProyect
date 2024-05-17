@@ -8,7 +8,7 @@ namespace Tennis.Services.Interfaces
         Task<List<Tournament>> GetHistorialTournaments();
         Task<List<Tournament>> GetHistorialTournamentsFinishes(); 
         Task<Tournament> GetTournamentById(int id); 
-        Task<TournamentRequest> CreateNewTournament(TournamentRequest tournament); 
+        Task<Tournament> CreateNewTournament(TournamentRequest tournament); 
         Task<Tournament> SetWinner(int tournamentId, int winnerPlayerId);
     }
 }

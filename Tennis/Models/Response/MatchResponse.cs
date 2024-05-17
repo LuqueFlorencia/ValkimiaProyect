@@ -7,5 +7,7 @@
         public int IdPlayer1 { get; set; }
         public int IdPlayer2 { get; set; }
         public int? WinnerId { get; set; }
+        public string? WinnerFirstName { get; set; }
+        public string? WinnerLastName { get; set; }
     }
 }

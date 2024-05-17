@@ -10,5 +10,8 @@ namespace Tennis.Models.Response
         public int Capacity { get; set; }
         public int Prize { get; set; }
         public int? WinnerId { get; set; }
+        public string ? FirstName { get; set; }
+        public string ? LastName { get; set; }
+
     }
 }

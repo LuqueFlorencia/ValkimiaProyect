@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Tennis.Models.Entity;
 using Tennis.Services.Interfaces;
 using Newtonsoft.Json;
+using Tennis.Models.Request;
 
 namespace Tennis.Repository
 {
@@ -14,10 +15,29 @@ namespace Tennis.Repository
             _context = context;
         }
 
+        public async Task<TournamentRequest> CreateNewTournament(TournamentRequest tournament)
+        {
+            _context.Add(tournament);
+            await _context.SaveChangesAsync();
+            return tournament;
+        }
+
         public async Task<List<Tournament>> GetHistorialTournaments()
         {
             var tournament = new List<Tournament>();
-            tournament = await _context.Set<Tournament>().ToListAsync();
+            tournament = await _context.Set<Tournament>()
+                                .ToListAsync();
+            return tournament;
+        }
+
+        public async Task<List<Tournament>> GetHistorialTournamentsFinishes()
+        {
+            var tournament = new List<Tournament>();
+            tournament = await _context.Set<Tournament>()
+                .Where(t => t.WinnerId != null)
+                .Include(t => t.Player)
+                .ThenInclude(t => t.Person)
+                .ToListAsync();
             return tournament;
         }
 

@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Tennis.Helpers;
+using Tennis.Mappers;
 using Tennis.Models.Entity;
+using Tennis.Models.Request;
 using Tennis.Services.Interfaces;
 
 namespace Tennis.Repository
@@ -14,6 +16,23 @@ namespace Tennis.Repository
             _context = context;
         }
 
+        public async Task<Player> Create(PlayerRequest playerRequest)
+        {
+            var potencialDuplicado = await _context.Set<Player>()
+                                            .Where(a => a.Person.FirstName == playerRequest.FirstName && a.Person.LastName == playerRequest.LastName)
+                                            .FirstOrDefaultAsync();
+
+            if (potencialDuplicado != null)
+                throw new Exception();
+
+            var newPlayerToPlay = playerRequest.ToPlayer();
+
+            _context.Add(newPlayerToPlay);
+
+            await _context.SaveChangesAsync();
+            return newPlayerToPlay;
+        }
+
         public async Task<List<Player>> GetAll(Gender gender)
         {
             var players = new List<Player>();
@@ -23,8 +42,19 @@ namespace Tennis.Repository
 
         public async Task<List<Player>> GetRegisteredPlayersByTournament(int id)
         {
+
             var registers = new List<RegisteredPlayer>();
-            registers = await _context.Set<RegisteredPlayer>().Where(x => x.TournamentId == id).Include(x => x.Player).ToListAsync();
+            registers = await _context.Set<RegisteredPlayer>()
+                .Where(x => x.TournamentId == id)
+                .Include(x => x.Player)
+                .ThenInclude(x=>x.Person)
+                .ToListAsync();
+
+            if (!registers.Any())
+            {
+                throw new Exception("The tournament doesn't have registered players");
+            }
+
             var players = new List<Player>();
             foreach (var register in registers)
             {
@@ -40,7 +70,8 @@ namespace Tennis.Repository
             var player = new Player();
             player = await _context.Set<Player>().FirstOrDefaultAsync(p => p.IdPlayer == registeredPlayer.PlayerId);
             var tournament = new Tournament();
-            tournament = await _context.Set<Tournament>().FirstOrDefaultAsync(t => t.IdTournament == registeredPlayer.TournamentId);
+            tournament = await _context.Set<Tournament>()
+                .FirstOrDefaultAsync(t => t.IdTournament == registeredPlayer.TournamentId);
 
             if (player == null)
             {

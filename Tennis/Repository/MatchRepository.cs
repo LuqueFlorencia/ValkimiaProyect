@@ -26,7 +26,11 @@ namespace Tennis.Repository
         public async Task<List<Match>> GetMatchesByTournamentId(int id)
         {
             var matches = new List<Match>();
-            matches = await _context.Set<Match>().Where(m => m.TournamentId == id).ToListAsync();
+            matches = await _context.Set<Match>()
+                .Where(m => m.TournamentId == id)
+                .Include(t => t.PlayerWinner)
+                .ThenInclude(t => t.Person)
+                .ToListAsync();
             return matches;
         }
 

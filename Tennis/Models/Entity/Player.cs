@@ -21,6 +21,7 @@ namespace Tennis.Models.Entity
             }
         }
         public Person Person { get; set; } = null!;
+        public Tournament Tournament { get; set; }
         public ICollection<RegisteredPlayer> ? RegisteredPlayers { get; set; }
         public virtual ICollection<Match> ? MatchesWinner { get; set; }
         public virtual ICollection<Match> ? MatchesAsP1 { get; set; }

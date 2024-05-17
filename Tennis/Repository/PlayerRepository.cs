@@ -4,6 +4,7 @@ using Tennis.Helpers;
 using Tennis.Mappers;
 using Tennis.Models.Entity;
 using Tennis.Models.Request;
+using Tennis.Services;
 using Tennis.Services.Interfaces;
 
 namespace Tennis.Repository
@@ -18,19 +19,16 @@ namespace Tennis.Repository
 
         public async Task<Player> Create(PlayerRequest playerRequest)
         {
-            var potencialDuplicado = await _context.Set<Player>()
-                                            .Where(a => a.Person.FirstName == playerRequest.FirstName && a.Person.LastName == playerRequest.LastName)
-                                            .FirstOrDefaultAsync();
-
-            if (potencialDuplicado != null)
+            var potencialDuplicated = await _context.Set<Player>()
+                .Where(a => a.Person.FirstName == playerRequest.FirstName && a.Person.LastName == playerRequest.LastName)
+                .FirstOrDefaultAsync();
+            if (potencialDuplicated != null)
                 throw new Exception();
 
-            var newPlayerToPlay = playerRequest.ToPlayer();
-
-            _context.Add(newPlayerToPlay);
-
+            var newPlayer = playerRequest.ToPlayer();
+            _context.Add(newPlayer);
             await _context.SaveChangesAsync();
-            return newPlayerToPlay;
+            return newPlayer;
         }
 
         public async Task<List<Player>> GetAll(Gender gender)
@@ -50,16 +48,13 @@ namespace Tennis.Repository
                 .ThenInclude(x=>x.Person)
                 .ToListAsync();
 
-            if (!registers.Any())
-            {
-                throw new Exception("The tournament doesn't have registered players");
-            }
+            if (!registers.Any()) { throw new Exception("The tournament doesn't have registered players"); }
 
             var players = new List<Player>();
             foreach (var register in registers)
             {
                 var player = new Player();
-                player = register.Player;
+                player = register.Player.GetFullName();
                 players.Add(player);
             }
             return players;
@@ -73,20 +68,15 @@ namespace Tennis.Repository
             tournament = await _context.Set<Tournament>()
                 .FirstOrDefaultAsync(t => t.IdTournament == registeredPlayer.TournamentId);
 
-            if (player == null)
-            {
-                throw new Exception("The player doesn't exist.");
-            }
+            if (player == null) { throw new Exception("The player doesn't exist."); }
 
-            if (tournament == null)
-            {
-                throw new Exception("The tournament doesn't exist.");
-            }
+            if (tournament == null) { throw new Exception("The tournament doesn't exist."); }
 
             if (player.Gender != tournament.Gender)
             {
                 throw new Exception("The player's gender doesn't match with tournament's gender.");
             }
+
             var newRegister = new RegisteredPlayer();
             newRegister.PlayerId = registeredPlayer.PlayerId;
             newRegister.TournamentId = registeredPlayer.TournamentId;

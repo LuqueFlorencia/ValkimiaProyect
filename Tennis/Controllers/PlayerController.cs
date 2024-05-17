@@ -3,11 +3,14 @@ using Azure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
+using Tennis.Helpers;
+using Tennis.Mappers;
 using Tennis.Middlewares;
 using Tennis.Models.Entity;
 using Tennis.Models.Request;
 using Tennis.Models.Response;
 using Tennis.Repository;
+using Tennis.Services;
 using Tennis.Services.Interfaces;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -60,7 +63,7 @@ namespace Tennis.Controllers
             newRegister.TournamentId = registeredPlayerRequest.TournamentId;
 
             newRegister = await _playerRepository.RegisterInTournament(newRegister);
-            string register = "Player " + newRegister.PlayerId.ToString() + " Registered";
+            string register = "Player " + newRegister.PlayerId + " Registered";
             return Ok(register);
         }
 
@@ -70,11 +73,11 @@ namespace Tennis.Controllers
         {
             try
             {
-                var response = _playerRepository.Create(playerRequest);
-
-                await response;
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = response });
+                var player = new Player();
+                player = await _playerRepository.Create(playerRequest);
+                var playerResponse = player.ToPlayerResponse();
+                string player_string = JsonConvert.SerializeObject(playerResponse);
+                return Ok(player_string);
             }
             catch (Exception exception)
             {

@@ -29,7 +29,14 @@ namespace Tennis.Services
         public static string GetFullName(this Player player)
         {
             string fullName = string.Empty;
-            fullName = player.Person.LastName +", "+ player.Person.FirstName;
+            if (player != null)
+            {
+                if (player.Person != null)
+                {
+                    fullName = player.Person.LastName + ", " + player.Person.FirstName;
+                }
+            }
+
             return fullName;
         }
     }

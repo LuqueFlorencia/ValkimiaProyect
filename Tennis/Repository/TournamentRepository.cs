@@ -4,6 +4,7 @@ using Tennis.Models.Entity;
 using Tennis.Services.Interfaces;
 using Newtonsoft.Json;
 using Tennis.Models.Request;
+using Tennis.Mappers;
 
 namespace Tennis.Repository
 {
@@ -17,18 +18,32 @@ namespace Tennis.Repository
 
         public async Task<Tournament> CreateNewTournament(TournamentRequest tournamentRequest)
         {
-            var tournament = new Tournament();
-            tournament.StartDate = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day); //tournamentRequest.StartDate;
-            tournament.EndDate = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day+1);//tournamentRequest.EndDate;
-            tournament.Gender = tournamentRequest.Gender;
-            tournament.Capacity = tournamentRequest.Capacity;
-            tournament.Name = tournamentRequest.Name;
-            tournament.WinnerId = null;
-            tournament.Prize = tournamentRequest.Prize;
+            var potencialDuplicated = await _context.Set<Tournament>()
+                .Where(t => t.Name == tournamentRequest.Name && t.Gender == tournamentRequest.Gender)
+                .FirstOrDefaultAsync();
+            if (potencialDuplicated != null)
+            {
+                throw new Exception();
+            }
 
-            _context.Add(tournament);
+            //var options = new JsonSerializerOptions
+            //{
+            //    Converters =
+            //{
+            //    new DateOnlyJsonConverter()
+            //},
+            //    WriteIndented = true
+            //};
+            //string json = System.Text.Json.JsonSerializer.Serialize(tournamentRequest, options);
+            //Console.WriteLine(json);
+
+            //var deserializedTournamentRequest = System.Text.Json.JsonSerializer.Deserialize<TournamentRequest>(json, options);
+            //Console.WriteLine(deserializedTournamentRequest.StartDate);
+
+            var newTournament = tournamentRequest.ToTournament();
+            _context.Add(newTournament);
             await _context.SaveChangesAsync();
-            return tournament;
+            return newTournament;
         }
 
         public async Task<List<Tournament>> GetHistorialTournaments()

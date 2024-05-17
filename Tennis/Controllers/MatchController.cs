@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
+using Tennis.Mappers;
 using Tennis.Middlewares;
 using Tennis.Models.Entity;
 using Tennis.Models.Response;
@@ -38,17 +39,7 @@ namespace Tennis.Controllers
             foreach (var match in matches)
             {
                 var matchResponse = new MatchResponse();
-                matchResponse.Date = match.Date;
-                matchResponse.MatchType = match.GetMatchTypeDescription();
-                matchResponse.Player1 = match.Player1.GetFullName();
-                matchResponse.Player2 = match.Player2.GetFullName();
-                matchResponse.Winner = match.PlayerWinner.GetFullName();
-                //matchResponse.IdPlayer1 = match.IdPlayer1;
-                //matchResponse.IdPlayer2 = match.IdPlayer2;
-                //matchResponse.WinnerId = match.WinnerId;
-                //matchResponse.WinnerFirstName = match.PlayerWinner.Person.FirstName;
-                //matchResponse.WinnerLastName = match.PlayerWinner.Person.LastName;
-
+                matchResponse = match.ToMatchResponse();
                 matchesResponse.Add(matchResponse);
             }
             string match_string = JsonConvert.SerializeObject(matchesResponse);

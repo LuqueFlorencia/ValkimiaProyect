@@ -1,6 +1,7 @@
 using Tennis.Configuration;
 using Tennis.Middlewares;
 using Tennis.Repository;
+using Tennis.Services;
 using Tennis.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +17,9 @@ builder.Services.AddTennisDbConfiguration();
 builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
+builder.Services.AddScoped<IMatchService, MatchService>();
 
-var app = builder.Build();
+    var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using Tennis.Helpers;
 using Tennis.Mappers;
+using Tennis.Middlewares;
 using Tennis.Models.Entity;
 using Tennis.Models.Request;
 using Tennis.Models.Response;
-using Tennis.Services;
 using Tennis.Services.Interfaces;
 
 namespace Tennis.Controllers
@@ -20,12 +20,14 @@ namespace Tennis.Controllers
         private readonly ITournamentRepository _tournamentRepository;
         private readonly IMatchRepository _matchRepository;
         private readonly IPlayerRepository _playerRepository;
+        private readonly IMatchService _matchService;
 
-        public TournamentController(ITournamentRepository tournamentRepository, IMatchRepository matchRepository, IPlayerRepository playerRepository)
+        public TournamentController(ITournamentRepository tournamentRepository, IMatchRepository matchRepository, IPlayerRepository playerRepository, IMatchService matchService)
         {
             _tournamentRepository = tournamentRepository;
             _matchRepository = matchRepository;
             _playerRepository = playerRepository;
+            _matchService = matchService;
         }
 
         [HttpGet]
@@ -35,9 +37,13 @@ namespace Tennis.Controllers
         {
             var tournament = new Tournament();
             tournament = await _tournamentRepository.GetTournamentById(id);
+            if (tournament == null)
+            {
+                throw new BadRequestException("The tournament doesn't exist.");
+            }
             var player = new Player();
             var players = await _playerRepository.GetRegisteredPlayersByTournament(id);
-            player = await _matchRepository.PlayTournament(tournament, players);
+            player = await _matchService.PlayTournament(tournament, players);
             tournament = await _tournamentRepository.SetWinner(id, player.IdPlayer);
             Console.WriteLine("Player Winner: " + player.IdPlayer.ToString());
 
@@ -52,18 +58,16 @@ namespace Tennis.Controllers
         //Crea un nuevo torneo
         public async Task<IActionResult> Create([FromBody] TournamentRequest tournamentRequest)
         {
-            try
-            {
-                var tournament = new Tournament();
-                tournament = await _tournamentRepository.CreateNewTournament(tournamentRequest);
-                var tournamentResponse = tournament.ToTournamentResponse();
-                string tournament_string = JsonConvert.SerializeObject(tournamentResponse);
-                return Ok(tournament_string);
-            }
-            catch (Exception exception)
-            {
-                throw new Exception("The tournament is already exist.");
-            }
+            var tournament = new Tournament();
+            //VALIDACION DE INPUTS
+            if (!(tournamentRequest.Gender == Gender.Male || tournamentRequest.Gender == Gender.Female)) { throw new Exception("The Gender must be 1=Male or 2=Female."); }
+            if (!(tournamentRequest.Capacity % 2 == 0)) { throw new Exception("The tournament's capacity must be a multiple of 2 players."); }
+            if (tournamentRequest.Prize < 1) { throw new Exception("The tournament's prize must be greater than 0."); }
+
+            tournament = await _tournamentRepository.CreateNewTournament(tournamentRequest);
+            var tournamentResponse = tournament.ToTournamentResponse();
+            string tournament_string = JsonConvert.SerializeObject(tournamentResponse);
+            return Ok(tournament_string);
         }
 
         [HttpGet]

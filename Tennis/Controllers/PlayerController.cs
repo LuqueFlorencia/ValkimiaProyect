@@ -1,7 +1,4 @@
-﻿using System.Net;
-using Azure;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Tennis.Helpers;
 using Tennis.Mappers;
@@ -12,7 +9,6 @@ using Tennis.Models.Response;
 using Tennis.Repository;
 using Tennis.Services;
 using Tennis.Services.Interfaces;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Tennis.Controllers
 {
@@ -34,19 +30,18 @@ namespace Tennis.Controllers
         public async Task<IActionResult> GetRegisteredPlayersByTournament(int id)
         {
             var tournament = await _tournamentRepository.GetTournamentById(id);
-            if(tournament == null)
-            {
-                throw new BadRequestException("The tournament doesn't exist.");
+            if(tournament == null) 
+            { 
+                throw new BadRequestException("The tournament doesn't exist."); 
             }
+            
             var players = new List<Player>();
             players = await _playerRepository.GetRegisteredPlayersByTournament(id);
             var registersResponse = new List<RegisteredPlayerResponse>();
             foreach (var player in players)
             {
                 var registerResponse = new RegisteredPlayerResponse();
-                registerResponse.PlayerId = player.IdPlayer;
-                registerResponse.FirstName = player.Person.FirstName;
-                registerResponse.LastName = player.Person.LastName;
+                registerResponse.FullName = player.GetFullName();
 
                 registersResponse.Add(registerResponse);
             }
@@ -71,18 +66,18 @@ namespace Tennis.Controllers
         [Route("CreateNewPlayer")]
         public async Task<IActionResult> Create([FromBody] PlayerRequest playerRequest)
         {
-            try
-            {
-                var player = new Player();
-                player = await _playerRepository.Create(playerRequest);
-                var playerResponse = player.ToPlayerResponse();
-                string player_string = JsonConvert.SerializeObject(playerResponse);
-                return Ok(player_string);
-            }
-            catch (Exception exception)
-            {
-                throw new Exception("The player is already registrated");
-            }
+            var player = new Player();
+            //VALIDACION DE INPUTS
+            if (!(playerRequest.Gender == Gender.Male || playerRequest.Gender == Gender.Female)) { throw new Exception("The Gender must be 1=Male or 2=Female."); }
+            if (!(playerRequest.Hand == Hand.Left || playerRequest.Hand == Hand.Right)) { throw new Exception("The Hand must be 1=Right or 2=Left."); }
+            if (playerRequest.Strength < 1 || playerRequest.Strength > 100) { throw new Exception("The Strenght must be between 1 to 99."); }
+            if (playerRequest.Speed < 1 || playerRequest.Speed > 100) { throw new Exception("The Speed must be between 1 to 99.");  };
+            if (playerRequest.ReactionTime < 1 || playerRequest.ReactionTime > 100) { throw new Exception("The ReactionTime must be between 1 to 99."); }
+
+            player = await _playerRepository.Create(playerRequest);
+            var playerResponse = player.ToPlayerResponse();
+            string player_string = JsonConvert.SerializeObject(playerResponse);
+            return Ok(player_string);
         }
     }
 }

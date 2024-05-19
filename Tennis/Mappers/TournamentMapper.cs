@@ -15,7 +15,7 @@ namespace Tennis.Mappers
                 Name = tournamentRequest.Name,
                 Gender = tournamentRequest.Gender,
                 StartDate = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day),
-                EndDate = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1),
+                EndDate = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day),
                 Capacity = tournamentRequest.Capacity,
                 Prize = tournamentRequest.Prize,
             };

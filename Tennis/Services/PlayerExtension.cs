@@ -36,7 +36,6 @@ namespace Tennis.Services
                     fullName = player.Person.LastName + ", " + player.Person.FirstName;
                 }
             }
-
             return fullName;
         }
     }

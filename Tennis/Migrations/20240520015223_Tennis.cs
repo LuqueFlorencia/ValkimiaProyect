@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Tennis.Migrations
 {
     /// <inheritdoc />
-    public partial class Entities : Migration
+    public partial class Tennis : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,25 +23,6 @@ namespace Tennis.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Person", x => x.IdPerson);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Tournament",
-                columns: table => new
-                {
-                    IdTournament = table.Column<int>(type: "int", maxLength: 4, nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Gender = table.Column<int>(type: "int", nullable: false),
-                    StartDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    EndDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Capacity = table.Column<int>(type: "int", maxLength: 3, nullable: false),
-                    Prize = table.Column<int>(type: "int", maxLength: 10, nullable: false),
-                    WinnerId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tournament", x => x.IdTournament);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,7 +58,9 @@ namespace Tennis.Migrations
                     IdPerson = table.Column<int>(type: "int", maxLength: 4, nullable: false),
                     Rol = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Username = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                    Password = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RefreshTokenExpiration = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -88,6 +71,30 @@ namespace Tennis.Migrations
                         principalTable: "Person",
                         principalColumn: "IdPerson",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tournament",
+                columns: table => new
+                {
+                    IdTournament = table.Column<int>(type: "int", maxLength: 4, nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Gender = table.Column<int>(type: "int", nullable: false),
+                    StartDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    EndDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    Capacity = table.Column<int>(type: "int", maxLength: 3, nullable: false),
+                    Prize = table.Column<int>(type: "int", maxLength: 10, nullable: false),
+                    WinnerId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tournament", x => x.IdTournament);
+                    table.ForeignKey(
+                        name: "FK_Tournament_Player_WinnerId",
+                        column: x => x.WinnerId,
+                        principalTable: "Player",
+                        principalColumn: "IdPlayer");
                 });
 
             migrationBuilder.CreateTable(
@@ -182,6 +189,13 @@ namespace Tennis.Migrations
                 column: "TournamentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Tournament_WinnerId",
+                table: "Tournament",
+                column: "WinnerId",
+                unique: true,
+                filter: "[WinnerId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_User_IdPerson",
                 table: "User",
                 column: "IdPerson",
@@ -201,10 +215,10 @@ namespace Tennis.Migrations
                 name: "User");
 
             migrationBuilder.DropTable(
-                name: "Player");
+                name: "Tournament");
 
             migrationBuilder.DropTable(
-                name: "Tournament");
+                name: "Player");
 
             migrationBuilder.DropTable(
                 name: "Person");

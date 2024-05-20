@@ -1,10 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using Tennis.Models.Entity;
-using Tennis.Services.Interfaces;
-using Tennis.Services;
-using System.Reflection;
-using Tennis.Helpers;
+using Tennis.Repository.Interfaces;
 
 namespace Tennis.Repository
 {
@@ -16,6 +13,7 @@ namespace Tennis.Repository
             _context = context;
         }
 
+        //Crea un nuevo partido 
         public async Task<Match> Create(Match match)
         {
             _context.Add(match);
@@ -23,50 +21,23 @@ namespace Tennis.Repository
             return match;
         }
 
+        //Muestra todos los partidos de un torneo especifico
         public async Task<List<Match>> GetMatchesByTournamentId(int id)
         {
             var matches = new List<Match>();
             matches = await _context.Set<Match>()
-                .Where(m => m.TournamentId == id)
+                .Where(t => t.TournamentId == id)
                 .Include(t => t.PlayerWinner).ThenInclude(pw => pw.Person)
                 .Include(t => t.Player1).ThenInclude(p1 => p1.Person)
                 .Include(t => t.Player2).ThenInclude(p2 => p2.Person)
-                .OrderByDescending(x=>x.MatchType)
+                .OrderByDescending(x => x.MatchType)
                 .ToListAsync();
+
+            if (!matches.Any())
+            {
+                Console.WriteLine("The tournament doesn't have scheduled matches yet.");
+            }
             return matches;
         }
-
-        //public async Task<Player> PlayTournament(Tournament tournament, List<Player> players)
-        //{
-        //    var winners = new List<Player>();
-
-        //    while (players.Count > 1)
-        //    {
-        //        //MAKE MATCHES
-        //        for (int i = 0; i < players.Count; i = i + 2)
-        //        {
-        //            var match = new Models.Entity.Match();
-        //            match.TournamentId = tournament.IdTournament;
-        //            match.IdPlayer1 = players[i].IdPlayer;
-        //            match.Player1 = players[i];
-        //            match.IdPlayer2 = players[i + 1].IdPlayer;
-        //            match.Player2 = players[i + 1];
-        //            match.Date = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-        //            match.MatchType = players.Count / 2;
-
-        //            //PLAY MATCHES
-        //            var winner = new Player();
-        //            winner = match.GetWinner();
-        //            match.WinnerId = winner.IdPlayer;
-        //            winners.Add(winner);
-
-        //            match = await this.Create(match);
-        //        }
-        //        players.Clear();
-        //        players.AddRange(winners);
-        //        winners.Clear();
-        //    }
-        //    return players[0];
-        //}
     }
 }

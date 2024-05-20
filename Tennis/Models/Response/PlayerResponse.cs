@@ -1,7 +1,4 @@
-﻿using Tennis.Helpers;
-using Tennis.Models.Entity;
-
-namespace Tennis.Models.Response
+﻿namespace Tennis.Models.Response
 {
     public class PlayerResponse
     {

@@ -63,30 +63,6 @@ namespace Tennis.Models.Entity
 
             builder.HasMany(t => t.RegisteredPlayers)
                 .WithOne(rp => rp.Tournament);
-
-            //builder.HasData(new Tournament
-            //{
-            //    IdTournament = 1,
-            //    Name = "MaleTennisTour",
-            //    Gender = Gender.Male,
-            //    StartDate = new DateOnly(2024, 05, 01),
-            //    EndDate = new DateOnly(2024, 05, 07),
-            //    Capacity = 8,
-            //    Prize = 100000,
-            //    WinnerId = null
-            //},
-            //new Tournament
-            //{
-            //    IdTournament = 2,
-            //    Name = "FemaleTennisTour",
-            //    Gender = Gender.Female,
-            //    StartDate = new DateOnly(2024, 05, 01),
-            //    EndDate = new DateOnly(2024, 05, 07),
-            //    Capacity = 8,
-            //    Prize = 100000,
-            //    WinnerId = null
-            //});
         }
     }   
-
 }

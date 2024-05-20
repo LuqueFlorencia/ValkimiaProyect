@@ -30,55 +30,6 @@ namespace Tennis.Models.Entity
                 .HasColumnName("LastName")
                 .HasMaxLength(50)
                 .IsRequired();
-
-            //builder.HasData(new Person
-            //{
-            //    IdPerson = 1,
-            //    FirstName = "Gustavo",
-            //    LastName = "Lucci"
-            //},
-            //new Person
-            //{
-            //    IdPerson = 2,
-            //    FirstName = "Facundo",
-            //    LastName = "Villalobo"
-            //},
-            //new Person
-            //{
-            //    IdPerson = 3,
-            //    FirstName = "Matias",
-            //    LastName = "Corredera"
-            //},
-            //new Person
-            //{
-            //    IdPerson = 4,
-            //    FirstName = "Lautaro",
-            //    LastName = "De Simeone"
-            //},
-            //new Person
-            //{
-            //    IdPerson = 5,
-            //    FirstName = "Carlos",
-            //    LastName = "Palladino"
-            //},
-            //new Person
-            //{
-            //    IdPerson = 6,
-            //    FirstName = "Emiliano",
-            //    LastName = "Caballero"
-            //},
-            //new Person
-            //{
-            //    IdPerson = 7,
-            //    FirstName = "Nicolas",
-            //    LastName = "Jimenez"
-            //},
-            //new Person
-            //{
-            //    IdPerson = 8,
-            //    FirstName = "Nicolas",
-            //    LastName = "Silva"
-            //});
         }
     }
 }

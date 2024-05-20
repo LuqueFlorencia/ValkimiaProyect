@@ -35,13 +35,22 @@ namespace Tennis.Middlewares
         {
             _logger.LogError(exception, $"Algo salio mal: {exception.Message}");
             //// Configurar la respuesta HTTP
-            
-            var code = HttpStatusCode.InternalServerError; // 500 if unexpected
+
+            var code = HttpStatusCode.InternalServerError; // Error 500
 
             // Aquí puedes manejar diferentes tipos de excepciones
-            if (exception is BadRequestException) code = HttpStatusCode.BadRequest; // 400
-            else if (exception is UnauthorizedAccessException) code = HttpStatusCode.Unauthorized; // 401
-            else if (exception is EntityNotFoundException) code = HttpStatusCode.NotFound; // 404
+            if (exception is BadRequestException)
+            {
+                code = HttpStatusCode.BadRequest; // Error 400
+            }
+            else if (exception is UnauthorizedAccessException)
+            {
+                code = HttpStatusCode.Unauthorized; // Error 401
+            }
+            else if (exception is EntityNotFoundException)
+            {
+                code = HttpStatusCode.NotFound; // Error 404
+            }
             
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;

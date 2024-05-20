@@ -6,8 +6,8 @@ using Tennis.Middlewares;
 using Tennis.Models.Entity;
 using Tennis.Models.Response;
 using Tennis.Repository;
+using Tennis.Repository.Interfaces;
 using Tennis.Services;
-using Tennis.Services.Interfaces;
 
 namespace Tennis.Controllers
 {
@@ -24,8 +24,8 @@ namespace Tennis.Controllers
         }
 
         [HttpGet]
-        [Route("MatchesByTournament{id}")]
-        //Muestra todos los partidos programados para un torneo especifico
+        [Route("GetMatchesByTournament{id}")]
+        //Muestra todos los partidos de un torneo especifico
         public async Task<IActionResult> GetMatchesByTournamentId(int id)
         {
             var tournament = await _tournamentRepository.GetTournamentById(id);
@@ -42,6 +42,7 @@ namespace Tennis.Controllers
                 matchResponse = match.ToMatchResponse();
                 matchesResponse.Add(matchResponse);
             }
+
             string match_string = JsonConvert.SerializeObject(matchesResponse);
             return Ok(match_string);
         }

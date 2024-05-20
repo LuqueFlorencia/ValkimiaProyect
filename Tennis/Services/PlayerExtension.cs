@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Text.RegularExpressions;
 using Tennis.Helpers;
 using Tennis.Models.Entity;
 
@@ -37,6 +37,12 @@ namespace Tennis.Services
                 }
             }
             return fullName;
+        }
+
+        public static bool IsValidName (string name)
+        {
+            string pattern = @"^[a-zA-Z]+$";
+            return Regex.IsMatch(name, pattern);
         }
     }
 }

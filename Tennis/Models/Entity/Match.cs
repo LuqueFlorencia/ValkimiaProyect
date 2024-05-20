@@ -8,7 +8,7 @@ namespace Tennis.Models.Entity
         public int IdMatch { get; set; }
         public int TournamentId { get; set; }
         public DateOnly Date { get; set; }
-        public int MatchType { get; set; } //8vo, 4to, Semi, Final [4,3,2,1]
+        public int MatchType { get; set; } //8vo, 4to, Semi, Final
         public int IdPlayer1 { get; set; }
         public int IdPlayer2 { get; set; }
         public int ? WinnerId { get; set; }

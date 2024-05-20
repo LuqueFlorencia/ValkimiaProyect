@@ -12,8 +12,8 @@ using Tennis.Repository;
 namespace Tennis.Migrations
 {
     [DbContext(typeof(TennisContext))]
-    [Migration("20240513001008_Entities")]
-    partial class Entities
+    [Migration("20240520015223_Tennis")]
+    partial class Tennis
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -210,6 +210,10 @@ namespace Tennis.Migrations
 
                     b.HasKey("IdTournament");
 
+                    b.HasIndex("WinnerId")
+                        .IsUnique()
+                        .HasFilter("[WinnerId] IS NOT NULL");
+
                     b.ToTable("Tournament", (string)null);
                 });
 
@@ -233,6 +237,14 @@ namespace Tennis.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("Password");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("RefreshToken");
+
+                    b.Property<DateTime?>("RefreshTokenExpiration")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("RefreshTokenExpiration");
 
                     b.Property<string>("Rol")
                         .IsRequired()
@@ -320,6 +332,15 @@ namespace Tennis.Migrations
                     b.Navigation("Tournament");
                 });
 
+            modelBuilder.Entity("Tennis.Models.Entity.Tournament", b =>
+                {
+                    b.HasOne("Tennis.Models.Entity.Player", "Player")
+                        .WithOne("Tournament")
+                        .HasForeignKey("Tennis.Models.Entity.Tournament", "WinnerId");
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("Tennis.Models.Entity.User", b =>
                 {
                     b.HasOne("Tennis.Models.Entity.Person", "Person")
@@ -347,6 +368,9 @@ namespace Tennis.Migrations
                     b.Navigation("MatchesWinner");
 
                     b.Navigation("RegisteredPlayers");
+
+                    b.Navigation("Tournament")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Tennis.Models.Entity.Tournament", b =>

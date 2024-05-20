@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using System.Numerics;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Tennis.Helpers;
 using Tennis.Mappers;
 using Tennis.Models.Entity;
 using Tennis.Models.Request;
-using Tennis.Services;
-using Tennis.Services.Interfaces;
+using Tennis.Repository.Interfaces;
 
 namespace Tennis.Repository
 {
@@ -17,6 +17,7 @@ namespace Tennis.Repository
             _context = context;
         }
 
+        //Crea un nuevo jugador
         public async Task<Player> Create(PlayerRequest playerRequest)
         {
             var potencialDuplicated = await _context.Set<Player>()
@@ -33,13 +34,25 @@ namespace Tennis.Repository
             return newPlayer;
         }
 
-        public async Task<List<Player>> GetAll(Gender gender)
+        //Borra un jugador
+        public async Task<Player> DeletePlayer(int id)
         {
-            var players = new List<Player>();
-            players = await _context.Set<Player>().Where(p => p.Gender == gender).ToListAsync();
-            return players;
+            var player = new Player();
+            player = await _context.Set<Player>().FirstOrDefaultAsync(a => a.IdPlayer == id);
+            if (player == null) 
+            { 
+                throw new Exception("The player doesn't exist."); 
+            }
+            if (player.MatchesAsP1 == null || player.MatchesAsP2 == null || player.RegisteredPlayers == null)
+            {
+                throw new Exception("The player is related to a tournament. It cannot be deleted.");
+            }
+            _context.Set<Player>().Remove(player);
+            await _context.SaveChangesAsync();
+            return player;
         }
 
+        //Muestra todos los jugadores registrados para un torneo especifico
         public async Task<List<Player>> GetRegisteredPlayersByTournament(int id)
         {
             var registers = new List<RegisteredPlayer>();
@@ -61,6 +74,7 @@ namespace Tennis.Repository
             return players;
         }
 
+        //Registra un jugador para que pueda jugar un torneo
         public async Task<RegisteredPlayer> RegisterInTournament(RegisteredPlayer registeredPlayer)
         {
             var potencialDuplicated = await _context.Set<RegisteredPlayer>()
@@ -79,13 +93,8 @@ namespace Tennis.Repository
                 .FirstOrDefaultAsync(t => t.IdTournament == registeredPlayer.TournamentId);
 
             if (player == null) { throw new Exception("The player doesn't exist."); }
-
             if (tournament == null) { throw new Exception("The tournament doesn't exist."); }
-
-            if (player.Gender != tournament.Gender)
-            {
-                throw new Exception("The player's gender doesn't match with tournament's gender.");
-            }
+            if (player.Gender != tournament.Gender) { throw new Exception("The player's gender doesn't match with tournament's gender."); }  
 
             var players = new List<Player>();
             int totalPlayersRegistered = 0;
@@ -103,7 +112,7 @@ namespace Tennis.Repository
             }
             else
             {
-                throw new Exception("The tournament is full.");
+                throw new Exception($"The tournament {tournament.Name} is full.");
             }
         }
     }

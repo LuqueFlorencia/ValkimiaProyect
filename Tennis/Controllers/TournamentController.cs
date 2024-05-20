@@ -1,7 +1,5 @@
-﻿using System.Text.Json;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using Tennis.Helpers;
 using Tennis.Mappers;
@@ -9,6 +7,8 @@ using Tennis.Middlewares;
 using Tennis.Models.Entity;
 using Tennis.Models.Request;
 using Tennis.Models.Response;
+using Tennis.Repository.Interfaces;
+using Tennis.Services;
 using Tennis.Services.Interfaces;
 
 namespace Tennis.Controllers
@@ -60,8 +60,9 @@ namespace Tennis.Controllers
         {
             var tournament = new Tournament();
             //VALIDACION DE INPUTS
+            if (!(TournamentExtension.IsValidName(tournamentRequest.Name))) { throw new Exception("The tournament's name is invalid."); };
             if (!(tournamentRequest.Gender == Gender.Male || tournamentRequest.Gender == Gender.Female)) { throw new Exception("The Gender must be 1=Male or 2=Female."); }
-            if (!(tournamentRequest.Capacity % 2 == 0)) { throw new Exception("The tournament's capacity must be a multiple of 2 players."); }
+            if (!(TournamentExtension.IsValidCapacity(tournamentRequest.Capacity))) { throw new Exception("The tournament's capacity must be a power of 2."); }
             if (tournamentRequest.Prize < 1) { throw new Exception("The tournament's prize must be greater than 0."); }
 
             tournament = await _tournamentRepository.CreateNewTournament(tournamentRequest);
@@ -70,8 +71,18 @@ namespace Tennis.Controllers
             return Ok(tournament_string);
         }
 
+        [HttpDelete]
+        [Route("DeleteTournamentBy{id}")]
+        //Borra un torneo
+        public async Task<IActionResult> DeleteTournament(int id)
+        {
+            var tournament = new Tournament();
+            tournament = await _tournamentRepository.DeleteTournament(id);
+            return Ok(tournament);
+        }
+
         [HttpGet]
-        [Route("AllTournaments")]
+        [Route("GetHistorialOfTournaments")]
         //Muestra el historial de todos los torneos: terminados con exito y los programados
         public async Task<IActionResult> GetHistorialTournaments()
         {
@@ -89,7 +100,7 @@ namespace Tennis.Controllers
         }
 
         [HttpGet]
-        [Route("AllTournamentsFinishes")]
+        [Route("GetHistorialOfTournamentsFinishes")]
         //Muestra el historial de los tornes finalizados con exito (es decir, ya tienen un ganador)
         public async Task<IActionResult> GetHistorialTournamentsFinishes()
         {

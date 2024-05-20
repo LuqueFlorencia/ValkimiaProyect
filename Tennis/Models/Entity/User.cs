@@ -10,6 +10,8 @@ namespace Tennis.Models.Entity
         public string Rol {  get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }
+        public string ? RefreshToken { get; set; }
+        public DateTime ? RefreshTokenExpiration { get; set; }
         public Person Person { get; set; } = null!;
     }
     public class UserConfig : IEntityTypeConfiguration<User>
@@ -39,6 +41,10 @@ namespace Tennis.Models.Entity
                 .HasColumnName("Password")
                 .HasMaxLength(20)
                 .IsRequired();
+            builder.Property(x => x.RefreshToken)
+                .HasColumnName("RefreshToken");
+            builder.Property(x => x.RefreshTokenExpiration)
+                .HasColumnName("RefreshTokenExpiration");
 
             builder.HasOne(p => p.Person)
                 .WithOne(p => p.User)

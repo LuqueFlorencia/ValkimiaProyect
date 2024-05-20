@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using Tennis.Helpers;
 using Tennis.Mappers;
@@ -6,9 +8,8 @@ using Tennis.Middlewares;
 using Tennis.Models.Entity;
 using Tennis.Models.Request;
 using Tennis.Models.Response;
-using Tennis.Repository;
+using Tennis.Repository.Interfaces;
 using Tennis.Services;
-using Tennis.Services.Interfaces;
 
 namespace Tennis.Controllers
 {
@@ -27,6 +28,7 @@ namespace Tennis.Controllers
 
         [HttpGet]
         [Route("GetRegisteredPlayersByTournament{id}")]
+        //Muestra todos los jugadores registrados para jugar un torneo especifico.
         public async Task<IActionResult> GetRegisteredPlayersByTournament(int id)
         {
             var tournament = await _tournamentRepository.GetTournamentById(id);
@@ -51,6 +53,7 @@ namespace Tennis.Controllers
 
         [HttpPost]
         [Route("RegisterPlayerInTournament")]
+        //Registra un jugador a un torneo 
         public async Task<IActionResult> RegisterInTournament([FromBody] RegisteredPlayerRequest registeredPlayerRequest)
         {
             var newRegister = new RegisteredPlayer();
@@ -63,11 +66,14 @@ namespace Tennis.Controllers
         }
 
         [HttpPost]
+        //Crea un nuevo jugador 
         [Route("CreateNewPlayer")]
         public async Task<IActionResult> Create([FromBody] PlayerRequest playerRequest)
         {
             var player = new Player();
             //VALIDACION DE INPUTS
+            if (!(PlayerExtension.IsValidName(playerRequest.FirstName))) { throw new Exception("The player's first name is invalid."); };
+            if (!(PlayerExtension.IsValidName(playerRequest.LastName))) { throw new Exception("The player's last name is invalid."); };
             if (!(playerRequest.Gender == Gender.Male || playerRequest.Gender == Gender.Female)) { throw new Exception("The Gender must be 1=Male or 2=Female."); }
             if (!(playerRequest.Hand == Hand.Left || playerRequest.Hand == Hand.Right)) { throw new Exception("The Hand must be 1=Right or 2=Left."); }
             if (playerRequest.Strength < 1 || playerRequest.Strength > 100) { throw new Exception("The Strenght must be between 1 to 99."); }
@@ -78,6 +84,16 @@ namespace Tennis.Controllers
             var playerResponse = player.ToPlayerResponse();
             string player_string = JsonConvert.SerializeObject(playerResponse);
             return Ok(player_string);
+        }
+
+        [HttpDelete]
+        //Borra un jugador
+        [Route("DeletePlayerBy{id}")]
+        public async Task<IActionResult> DeletePlayer(int id)
+        {
+            var player = new Player();
+            player = await _playerRepository.DeletePlayer(id);
+            return Ok(player);
         }
     }
 }

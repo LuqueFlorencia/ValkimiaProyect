@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Tennis.Models.Entity;
-using Tennis.Services.Interfaces;
 using Tennis.Models.Request;
 using Tennis.Mappers;
+using Tennis.Repository.Interfaces;
 
 namespace Tennis.Repository
 {
@@ -15,6 +14,7 @@ namespace Tennis.Repository
             _context = context;
         }
 
+        //Crea un nuevo torneo
         public async Task<Tournament> CreateNewTournament(TournamentRequest tournamentRequest)
         {
             var potencialDuplicated = await _context.Set<Tournament>()
@@ -31,6 +31,25 @@ namespace Tennis.Repository
             return newTournament;
         }
 
+        //Borra un torneo
+        public async Task<Tournament> DeleteTournament(int id)
+        {
+            var tournament = new Tournament();
+            tournament = await _context.Set<Tournament>().Include(x => x.RegisteredPlayers).FirstOrDefaultAsync(t => t.IdTournament == id);
+            if (tournament == null) 
+            { 
+                throw new Exception("The tournament doesn't exist."); 
+            }
+            if (tournament.Matches == null || tournament.RegisteredPlayers == null)
+            {
+                throw new Exception("The tournament has matches and/or players registered. It cannot be deleted.");
+            }
+            _context.Set<Tournament>().Remove(tournament);
+            await _context.SaveChangesAsync();
+            return tournament;
+        }
+
+        //Muestra el historial de todos los torneos existentes (ya jugados y programados)
         public async Task<List<Tournament>> GetHistorialTournaments()
         {
             var tournament = new List<Tournament>();
@@ -40,6 +59,7 @@ namespace Tennis.Repository
             return tournament;
         }
 
+        //Muestra el historial de todos los torneos completados exitosamente (ya tienen un ganador)
         public async Task<List<Tournament>> GetHistorialTournamentsFinishes()
         {
             var tournament = new List<Tournament>();

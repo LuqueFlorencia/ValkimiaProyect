@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Tennis.Models.Entity;
+﻿using Tennis.Models.Entity;
 
 namespace Tennis.Services
 {

@@ -37,10 +37,7 @@ namespace Tennis.Controllers
         {
             var tournament = new Tournament();
             tournament = await _tournamentRepository.GetTournamentById(id);
-            if (tournament == null)
-            {
-                throw new BadRequestException("The tournament doesn't exist.");
-            }
+            if (tournament == null) { throw new BadRequestException("The tournament doesn't exist."); }
             var player = new Player();
             var players = await _playerRepository.GetRegisteredPlayersByTournament(id);
             player = await _matchService.PlayTournament(tournament, players);
@@ -49,8 +46,7 @@ namespace Tennis.Controllers
 
             var tournamentResponse = new TournamentResponse();
             tournamentResponse = tournament.ToTournamentResponse();
-            string tournament_string = JsonConvert.SerializeObject(tournamentResponse);
-            return Ok(tournament_string);
+            return Ok(tournamentResponse);
         }
 
         [HttpPost]
@@ -60,15 +56,14 @@ namespace Tennis.Controllers
         {
             var tournament = new Tournament();
             //VALIDACION DE INPUTS
-            if (!(TournamentExtension.IsValidName(tournamentRequest.Name))) { throw new Exception("The tournament's name is invalid."); };
-            if (!(tournamentRequest.Gender == Gender.Male || tournamentRequest.Gender == Gender.Female)) { throw new Exception("The Gender must be 1=Male or 2=Female."); }
-            if (!(TournamentExtension.IsValidCapacity(tournamentRequest.Capacity))) { throw new Exception("The tournament's capacity must be a power of 2."); }
-            if (tournamentRequest.Prize < 1) { throw new Exception("The tournament's prize must be greater than 0."); }
+            if (!(TournamentExtension.IsValidName(tournamentRequest.Name))) { throw new BadRequestException("The tournament's name is invalid."); };
+            if (!(tournamentRequest.Gender == Gender.Male || tournamentRequest.Gender == Gender.Female)) { throw new BadRequestException("The Gender must be 1=Male or 2=Female."); }
+            if (!(TournamentExtension.IsValidCapacity(tournamentRequest.Capacity))) { throw new BadRequestException("The tournament's capacity must be a power of 2."); }
+            if (tournamentRequest.Prize < 1) { throw new BadRequestException("The tournament's prize must be greater than 0."); }
 
             tournament = await _tournamentRepository.CreateNewTournament(tournamentRequest);
             var tournamentResponse = tournament.ToTournamentResponse();
-            string tournament_string = JsonConvert.SerializeObject(tournamentResponse);
-            return Ok(tournament_string);
+            return Ok(tournamentResponse);
         }
 
         [HttpDelete]
@@ -86,17 +81,9 @@ namespace Tennis.Controllers
         //Muestra el historial de todos los torneos: terminados con exito y los programados
         public async Task<IActionResult> GetHistorialTournaments()
         {
-            var tournaments = new List<Tournament>();
+            var tournaments = new List<TournamentResponse>();
             tournaments = await _tournamentRepository.GetHistorialTournaments();
-            var tournamentsResponse = new List<TournamentResponse>();
-            foreach (var tournament in tournaments)
-            {
-                var tournamentResponse = new TournamentResponse();
-                tournamentResponse = tournament.ToTournamentResponse();
-                tournamentsResponse.Add(tournamentResponse);
-            }
-            string tournament_string = JsonConvert.SerializeObject(tournamentsResponse);
-            return Ok(tournament_string);
+            return Ok(tournaments);
         }
 
         [HttpGet]
@@ -104,17 +91,9 @@ namespace Tennis.Controllers
         //Muestra el historial de los tornes finalizados con exito (es decir, ya tienen un ganador)
         public async Task<IActionResult> GetHistorialTournamentsFinishes()
         {
-            var tournaments = new List<Tournament>();
+            var tournaments = new List<TournamentResponse>();
             tournaments = await _tournamentRepository.GetHistorialTournamentsFinishes();
-            var tournamentsResponse = new List<TournamentResponse>();
-            foreach (var tournament in tournaments)
-            {
-                var tournamentResponse = new TournamentResponse();
-                tournamentResponse = tournament.ToTournamentResponse();
-                tournamentsResponse.Add(tournamentResponse);
-            }
-            string tournament_string = JsonConvert.SerializeObject(tournamentsResponse);
-            return Ok(tournament_string);
+            return Ok(tournaments);
         }
     }
 }

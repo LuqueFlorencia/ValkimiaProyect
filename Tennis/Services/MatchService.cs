@@ -4,6 +4,7 @@ using Tennis.Models.Entity;
 using Tennis.Services.Interfaces;
 using Tennis.Repository;
 using Tennis.Repository.Interfaces;
+using Tennis.Middlewares;
 
 namespace Tennis.Services
 {
@@ -52,7 +53,7 @@ namespace Tennis.Services
             }
             else
             {
-                throw new Exception("The tournament doesn't have enought registered players to be play.");
+                throw new BadRequestException("The tournament doesn't have enought registered players to be play.");
             }
         }
     }

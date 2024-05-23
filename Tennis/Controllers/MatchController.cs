@@ -29,22 +29,11 @@ namespace Tennis.Controllers
         public async Task<IActionResult> GetMatchesByTournamentId(int id)
         {
             var tournament = await _tournamentRepository.GetTournamentById(id);
-            if (tournament == null)
-            {
-                throw new BadRequestException("The tournament doesn't exist.");
-            }
-            var matches = new List<Match>();
+            if (tournament == null) { throw new BadRequestException("The tournament doesn't exist."); }
+            var matches = new List<MatchResponse>();
             matches = await _matchRepository.GetMatchesByTournamentId(id);
-            var matchesResponse = new List<MatchResponse>();
-            foreach (var match in matches)
-            {
-                var matchResponse = new MatchResponse();
-                matchResponse = match.ToMatchResponse();
-                matchesResponse.Add(matchResponse);
-            }
 
-            string match_string = JsonConvert.SerializeObject(matchesResponse);
-            return Ok(match_string);
+            return Ok(matches);
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
+using Tennis.Mappers;
 using Tennis.Models.Entity;
+using Tennis.Models.Response;
 using Tennis.Repository.Interfaces;
 
 namespace Tennis.Repository
@@ -22,7 +24,7 @@ namespace Tennis.Repository
         }
 
         //Muestra todos los partidos de un torneo especifico
-        public async Task<List<Match>> GetMatchesByTournamentId(int id)
+        public async Task<List<MatchResponse>> GetMatchesByTournamentId(int id)
         {
             var matches = new List<Match>();
             matches = await _context.Set<Match>()
@@ -37,7 +39,16 @@ namespace Tennis.Repository
             {
                 Console.WriteLine("The tournament doesn't have scheduled matches yet.");
             }
-            return matches;
+
+            var matchesResponse = new List<MatchResponse>();
+            foreach (var match in matches)
+            {
+                var matchResponse = new MatchResponse();
+                matchResponse = match.ToMatchResponse();
+                matchesResponse.Add(matchResponse);
+            }
+
+            return matchesResponse;
         }
     }
 }

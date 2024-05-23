@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Tennis.Helpers;
 using Tennis.Mappers;
+using Tennis.Middlewares;
 using Tennis.Models.Entity;
 using Tennis.Models.Request;
 using Tennis.Repository.Interfaces;
@@ -25,7 +26,7 @@ namespace Tennis.Repository
                 .FirstOrDefaultAsync();
             if (potencialDuplicated != null)
             {
-                throw new Exception("The player is already registrated");
+                throw new BadRequestException("The player is already registrated");
             }
     
             var newPlayer = playerRequest.ToPlayer();
@@ -41,11 +42,11 @@ namespace Tennis.Repository
             player = await _context.Set<Player>().FirstOrDefaultAsync(a => a.IdPlayer == id);
             if (player == null) 
             { 
-                throw new Exception("The player doesn't exist."); 
+                throw new BadRequestException("The player doesn't exist."); 
             }
             if (player.MatchesAsP1 == null || player.MatchesAsP2 == null || player.RegisteredPlayers == null)
             {
-                throw new Exception("The player is related to a tournament. It cannot be deleted.");
+                throw new BadRequestException("The player is related to a tournament. It cannot be deleted.");
             }
             _context.Set<Player>().Remove(player);
             await _context.SaveChangesAsync();
@@ -83,7 +84,7 @@ namespace Tennis.Repository
             
             if (potencialDuplicated != null)
             {
-                throw new Exception("The player is already registered in the tournament.");
+                throw new BadRequestException("The player is already registered in the tournament.");
             }
 
             var player = new Player();
@@ -92,9 +93,9 @@ namespace Tennis.Repository
             tournament = await _context.Set<Tournament>()
                 .FirstOrDefaultAsync(t => t.IdTournament == registeredPlayer.TournamentId);
 
-            if (player == null) { throw new Exception("The player doesn't exist."); }
-            if (tournament == null) { throw new Exception("The tournament doesn't exist."); }
-            if (player.Gender != tournament.Gender) { throw new Exception("The player's gender doesn't match with tournament's gender."); }  
+            if (player == null) { throw new BadRequestException("The player doesn't exist."); }
+            if (tournament == null) { throw new BadRequestException("The tournament doesn't exist."); }
+            if (player.Gender != tournament.Gender) { throw new BadRequestException("The player's gender doesn't match with tournament's gender."); }  
 
             var players = new List<Player>();
             int totalPlayersRegistered = 0;
@@ -112,7 +113,7 @@ namespace Tennis.Repository
             }
             else
             {
-                throw new Exception($"The tournament {tournament.Name} is full.");
+                throw new BadRequestException($"The tournament {tournament.Name} is full.");
             }
         }
     }

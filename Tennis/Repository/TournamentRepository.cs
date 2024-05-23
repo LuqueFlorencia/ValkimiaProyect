@@ -3,6 +3,8 @@ using Tennis.Models.Entity;
 using Tennis.Models.Request;
 using Tennis.Mappers;
 using Tennis.Repository.Interfaces;
+using Tennis.Models.Response;
+using Tennis.Middlewares;
 
 namespace Tennis.Repository
 {
@@ -22,7 +24,7 @@ namespace Tennis.Repository
                 .FirstOrDefaultAsync();
             if (potencialDuplicated != null)
             {
-                throw new Exception("The tournament is already exist.");
+                throw new BadRequestException("The tournament is already exist.");
             }
 
             var newTournament = tournamentRequest.ToTournament();
@@ -38,11 +40,11 @@ namespace Tennis.Repository
             tournament = await _context.Set<Tournament>().Include(x => x.RegisteredPlayers).FirstOrDefaultAsync(t => t.IdTournament == id);
             if (tournament == null) 
             { 
-                throw new Exception("The tournament doesn't exist."); 
+                throw new BadRequestException("The tournament doesn't exist."); 
             }
             if (tournament.Matches == null || tournament.RegisteredPlayers == null)
             {
-                throw new Exception("The tournament has matches and/or players registered. It cannot be deleted.");
+                throw new BadRequestException("The tournament has matches and/or players registered. It cannot be deleted.");
             }
             _context.Set<Tournament>().Remove(tournament);
             await _context.SaveChangesAsync();
@@ -50,25 +52,43 @@ namespace Tennis.Repository
         }
 
         //Muestra el historial de todos los torneos existentes (ya jugados y programados)
-        public async Task<List<Tournament>> GetHistorialTournaments()
+        public async Task<List<TournamentResponse>> GetHistorialTournaments()
         {
-            var tournament = new List<Tournament>();
-            tournament = await _context.Set<Tournament>()
+            var tournaments = new List<Tournament>();
+            tournaments = await _context.Set<Tournament>()
                                 .Include(t => t.Player).ThenInclude(tp => tp.Person)
                                 .ToListAsync();
-            return tournament;
+
+            var tournamentsResponse = new List<TournamentResponse>();
+            foreach (var tournament in tournaments)
+            {
+                var tournamentResponse = new TournamentResponse();
+                tournamentResponse = tournament.ToTournamentResponse();
+                tournamentsResponse.Add(tournamentResponse);
+            }
+
+            return tournamentsResponse;
         }
 
         //Muestra el historial de todos los torneos completados exitosamente (ya tienen un ganador)
-        public async Task<List<Tournament>> GetHistorialTournamentsFinishes()
+        public async Task<List<TournamentResponse>> GetHistorialTournamentsFinishes()
         {
-            var tournament = new List<Tournament>();
-            tournament = await _context.Set<Tournament>()
+            var tournaments = new List<Tournament>();
+            tournaments = await _context.Set<Tournament>()
                 .Where(t => t.WinnerId != null)
                 .Include(t => t.Player)
                 .ThenInclude(t => t.Person)
                 .ToListAsync();
-            return tournament;
+
+            var tournamentsResponse = new List<TournamentResponse>();
+            foreach (var tournament in tournaments)
+            {
+                var tournamentResponse = new TournamentResponse();
+                tournamentResponse = tournament.ToTournamentResponse();
+                tournamentsResponse.Add(tournamentResponse);
+            }
+
+            return tournamentsResponse;
         }
 
         public async Task<Tournament> GetTournamentById(int id)
